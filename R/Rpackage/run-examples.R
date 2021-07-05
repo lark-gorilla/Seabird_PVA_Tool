@@ -14,7 +14,7 @@
 
 rm(list=objects())
 
-setwd("C://Users//adam//Work//Active//JNCC-PVA-testing//Version4.16//")
+setwd("C:/niras_rproj/Seabird_PVA_Tool/R/Rpackage/")
 
 ff <- list.files(".", pattern="functions") ; for(k in 1:length(ff)){ source(ff[k])} ## Automated Version 4.8
 
@@ -23,6 +23,55 @@ modeoptions <- read.csv("ModeOptions.csv") ## Added Version 2.1
 ## ##################################################
 
 library(popbio)
+
+## ##################################################################
+## Implement NIRAS/NE parameter choices
+## lookup values
+## ##################################################################
+
+
+lookup.dir <- "C://Users//adam//Work//AlreadyBackedUp//CEH-NE-PVA-Tool//Current//Data//Lookup//Version3.4//Tables//"
+## lookup.dir <- "C://Users//adam//Work//Active//NE-PVA//Data//Lookup//Version3.4//Tables//"
+
+example7 <- nepva.calcdefaults(Species = "Herring Gull", 
+                               poolregtype.BS = "Global", poolregion.BS = "Global", 
+                               sourcepop.surv = "National", lookup.dir = 'C:/niras_rproj/Seabird_PVA_Tool/R/Rpackage/')
+
+example1 <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and productivity (model.prodmax=T) env stochasticity from beta distribution (yes - NIRAS) 
+                                  model.demostoch = TRUE, # model demographic stochasticity (yes - NIRAS)
+                                  model.dd = "nodd", # ' nodd' = no density dependence (density independence - NIRAS)
+                                  model.prodmax = TRUE, # productivity rates constrained to be <= maximum brood size
+                                  mbs = 4, # maximum brood size
+                                  afb = 5, # age at first breeding
+                                  npop = 1, # number of populations (useful if >1 col per SPA) 
+                                  nscen = 1, # number of impact scenarios
+                                  sim.n = 5000, sim.seed = 1898, nburn = 0, # n simulations, seed number and n burn - NIRAS spec
+                                  demobase.specify.as.params = FALSE, # enter empirical values for prod and surv rather than estimate
+                                  demobase.splitpops = FALSE, # different demographic rates for each subpopulation, ignored if npop=1
+                                  demobase.splitimmat = FALSE, # different demographic rates specified for immatures? (no - NIRAS)
+                                  demobase.prod = data.frame(Mean=0.5, SD=0.05), 
+                                  demobase.survadult = data.frame(Mean =  0.88, SD = 0.03), # baseline survival mean(s) and SD(s)
+                                  inipop.years = c(2012), # year(s) when inital count was made
+                                  inipop.inputformat = "breeding.adults", # initial population size entered as breeding adults 
+                                  inipop.vals = c(791), # initial population value(s)
+                                  impacts.relative = TRUE, # specify relative impacts (% change in population from impact)
+                                  impacts.splitimmat = FALSE, # different impacts specified for immatures? (no - NIRAS)
+                                  impacts.year.start = 2013, # when to start impact (inipop.years+1 - NIRAS)
+                                  impacts.year.end = 2020,# when does impact end? (impacts.year.start+60 - NIRAS) 
+                                  impacts.splitpops = FALSE,  # different demographic rates for each subpopulation, ignored if npop=1
+                                  impacts.scennames = c("imp1"), # naming impact for reference
+                                  impacts.prod.mean = c(0), # impacts on productivity, val per population (use 0, no prod impacts - NIRAS)
+                                  impacts.survadult.mean = c(+0.05),# impacts on adult survival, val per population
+                                  impacts.provideses = TRUE, # whether to provide SEs for impacts (yes, I think -NIRAS)
+                                  impacts.prod.se = c(0), # se for productivity impact, 0 or NA?
+                                  impacts.survadult.se = c(0.01), # se for survival impact
+                                  output.agetype = "breeding.adults", #  output population as breeding adults
+                                  output.year.end = 2020, #when to end model (impacts.year.start+60 - NIRAS)
+                                  output.year.start = 2013, # when to start model report from, (inipop.years?)
+                                  output.popsize.target = NULL, # don't set output pop target
+                                  output.popsize.qe = NULL,# don't set output extinction risk target
+                                  silent = FALSE, # report progress, errors
+                                  changetablenames = TRUE) # match shiny table names
 
 ## ##################################################################
 ## Created Version 1.5 on 14 Jan 2018, last modified 16 Jan 2018
