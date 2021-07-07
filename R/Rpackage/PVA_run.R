@@ -24,14 +24,14 @@ lookup_dat<-read_xlsx('C:/R4/RIAA/PVA/PVA_lookup_collapsed.xlsx')
 lookup_dat
 
 PVA_run<-NULL
-for(i in unique(paste(lookup_dat$Species, lookup_dat$PVA_site, sep='@')))
+for(k in unique(paste(lookup_dat$Species, lookup_dat$PVA_site, sep='@')))
 
 {  
-sp_site_both<-lookup_dat[lookup_dat$Species==unlist(strsplit(i, "@"))[1] & lookup_dat$PVA_site==unlist(strsplit(i, "@"))[2],]
+sp_site_both<-lookup_dat[lookup_dat$Species==unlist(strsplit(k, "@"))[1] & lookup_dat$PVA_site==unlist(strsplit(k, "@"))[2],]
 
-for(j in c('site', 'incombo')) # run for in_combo and site separately
+for(m in c('site', 'incombo')) # run for in_combo and site separately
   {
-  sp_site<-sp_site_both[sp_site_both$mort_type==j,]
+  sp_site<-sp_site_both[sp_site_both$mort_type==m,]
   # need to convert absolute impact (n bird/yr mortality) to relative impact (% change in pop)
   # here we take mortalities apportioned to the SPA and / by total SPA meta population -
   # would be better to use total SPA population that went into apportioning analyses 
@@ -61,7 +61,10 @@ for(j in c('site', 'incombo')) # run for in_combo and site separately
   
   p_row<-sp_site[1,]# use first row of sp_site to lookup duplicate params in model
   
-  ## NEED TO INCLUDE NATIONAL IMMATURE SURVIVAL RATES
+  # lookup species' immature survival rates from tool at NATIONAL level
+  imm_surv<-nepva.calcdefaults(Species = p_row$Species, 
+                     poolregtype.BS = "Global", poolregion.BS = "Global", 
+                     sourcepop.surv = "National", lookup.dir = 'C:/niras_rproj/Seabird_PVA_Tool/R/Rpackage/')$demobase.survimmat
 
 ## ##################################################################
 # # code to run PVA with shiny app specifications
@@ -78,9 +81,10 @@ run1 <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and produ
                                   sim.n = 5000, sim.seed = 1898, nburn = 0, # n simulations, seed number and n burn - NIRAS spec
                                   demobase.specify.as.params = FALSE, # enter empirical values for prod and surv rather than estimate
                                   demobase.splitpops = FALSE, # different demographic rates for each subpopulation, ignored if npop=1
-                                  demobase.splitimmat = FALSE, # different demographic rates specified for immatures? (no - NIRAS)
+                                  demobase.splitimmat = TRUE, # different demographic rates specified for immatures? (yes, National - NIRAS)
                                   demobase.prod = data.frame(Mean=p_row$mn_base_prod, SD = p_row$sd_base_prod), # baseline productivity mean(s) and SD(s) # select first row as we batch run site and incombo assessments together
                                   demobase.survadult = data.frame(Mean =  p_row$mn_base_adsurv, SD = p_row$sd_base_adsurv), # baseline survival mean(s) and SD(s)
+                                  demobase.survimmat = imm_surv, # baseline survival mean(s) and SD(s) for different immature year groups 
                                   inipop.years = as.numeric(p_row$yr), # year(s) when inital count was made
                                   inipop.inputformat = "breeding.pairs", # initial population size entered as breeding pair (SMP data) 
                                   inipop.vals = p_row$Count_bp, # initial population value(s)
@@ -100,17 +104,17 @@ run1 <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and produ
                                   output.year.start = as.numeric(p_row$yr), # when to start model report from, (inipop.years?)
                                   output.popsize.target = NULL, # don't set output pop target
                                   output.popsize.qe = NULL,# don't set output extinction risk target
-                                  silent = TRUE, # supress progress, plots
+                                  silent = TRUE, # suppress progress text, plots
                                   changetablenames = TRUE) # match shiny table names
 
 
 # view output run1
- d1<-data.frame(Species=unlist(strsplit(i, "@"))[1], PVA_site=unlist(strsplit(i, "@"))[2], mort_type=j, run1)
+ d1<-data.frame(Species=unlist(strsplit(k, "@"))[1], PVA_site=unlist(strsplit(k, "@"))[2], mort_type=m, run1)
  print(d1)
 # bind runs together
  PVA_run<-rbind(PVA_run, d1)
-  } #close j loop
-}# close i loop
+  } #close m loop
+}# close k loop
 write.csv(PVA_run, 'C:/R4/RIAA/PVA/north_sea_run.csv', quote=F, row.names=F)
 
 ## ##################################################################
