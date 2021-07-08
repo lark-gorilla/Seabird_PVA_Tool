@@ -52,8 +52,8 @@ for(m in c('site', 'incombo')) # run for in_combo and site separately
   if(sum(mn_rel_imp_CRM)>0){impact_mean_list<-c(impact_mean_list,mn_rel_imp_CRM)}
   if(sum(mn_rel_imp_disp)>0){impact_mean_list<-c(impact_mean_list,mn_rel_imp_disp)}
   
-  if(sum(mn_rel_imp_CRM)>0){impact_name_list<-c(impact_name_list,paste('collision', 1:length(mn_rel_imp_CRM), sep='_'))}
-  if(sum(mn_rel_imp_disp)>0){impact_name_list<-c(impact_name_list,paste('displacement', 1:length(mn_rel_imp_disp), sep='_'))}
+  if(sum(mn_rel_imp_CRM)>0){impact_name_list<-c(impact_name_list,paste('CRM_mort', sp_site$mn_ann_mort_CRM, sep='_'))}
+  if(sum(mn_rel_imp_disp)>0){impact_name_list<-c(impact_name_list,paste('disp_mort', sp_site$mn_ann_mort_disp, sep='_'))}
   
   print(sp_site)
   print(impact_mean_list)
@@ -65,6 +65,7 @@ for(m in c('site', 'incombo')) # run for in_combo and site separately
   imm_surv<-nepva.calcdefaults(Species = p_row$Species, 
                      poolregtype.BS = "Global", poolregion.BS = "Global", 
                      sourcepop.surv = "National", lookup.dir = 'C:/niras_rproj/Seabird_PVA_Tool/R/Rpackage/')$demobase.survimmat
+  imm_surv$sd[is.na(imm_surv$sd)]<-mean(imm_surv$sd, na.rm=T) # catch sd NA error, set to other mean of other sd vals
 
 ## ##################################################################
 # # code to run PVA with shiny app specifications
