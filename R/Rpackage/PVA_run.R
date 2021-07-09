@@ -33,18 +33,18 @@ for(m in c('site', 'incombo')) # run for in_combo and site separately
   {
   sp_site<-sp_site_both[sp_site_both$mort_type==m,]
   # need to convert absolute impact (n bird/yr mortality) to relative impact (% change in pop)
-  # here we take mortlities apportioned to the SPA and / by total SPA meta population -
+  # here we take mortalities apportioned to the SPA and / by total SPA meta population -
   # would be better to use total SPA population that went into apportioning analyses 
   
   # CRM
-  mn_rel_imp_CRM<-(sp_site$mn_ann_mort_CRM)/sum(sp_site$Count_BrAd) # what units are absolute mortality, assumed n birds so divide by 2 to get bp?
-  #sd_rel_imp_CRM<-(sp_site$sd_ann_mort_CRM)/sum(sp_site$Count_BrAd) 
+  mn_rel_imp_CRM<-(sp_site$mn_ann_mort_CRM)/sp_site$Count_BrAd # what units are absolute mortality, assumed n birds so divide by 2 to get bp?
+  #sd_rel_imp_CRM<-(sp_site$sd_ann_mort_CRM)/sp_site$Count_BrAd 
   # displacement
-  mn_rel_imp_disp<-(sp_site$mn_ann_mort_disp)/sum(sp_site$Count_BrAd)
-  #sd_rel_imp_disp<-(sp_site$sd_ann_mort_disp)/sum(sp_site$Count_BrAd) 
+  mn_rel_imp_disp<-(sp_site$mn_ann_mort_disp)/sp_site$Count_BrAd
+  #sd_rel_imp_disp<-(sp_site$sd_ann_mort_disp)/sp_site$Count_BrAd 
   # total sum() CRM + displacement
-  mn_rel_imp_both<-((sp_site$mn_ann_mort_CRM+sp_site$mn_ann_mort_disp))/sum(sp_site$Count_BrAd)
-  #sd_rel_imp_both<-((sp_site$sd_ann_mort_CRM+sp_site$sd_ann_mort_disp))/sum(sp_site$Count_BrAd) 
+  mn_rel_imp_both<-((sp_site$mn_ann_mort_CRM+sp_site$mn_ann_mort_disp))/sp_site$Count_BrAd
+  #sd_rel_imp_both<-((sp_site$sd_ann_mort_CRM+sp_site$sd_ann_mort_disp))/sp_site$Count_BrAd 
   
   # make impact list, not running combined (both)
   impact_mean_list<-NULL
@@ -185,3 +185,43 @@ example1 <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and p
                                   output.popsize.qe = NULL,# don't set output extinction risk target
                                   silent = FALSE, # report progress, errors
                                   changetablenames = TRUE) # match shiny table names
+
+
+# APEM Params
+
+run_apem <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and productivity (model.prodmax=T) env stochasticity from beta distribution (yes - NIRAS) 
+                              model.demostoch = TRUE, # model demographic stochasticity (yes - NIRAS)
+                              model.dd = "nodd", # ' nodd' = no density dependence (density independence - NIRAS)
+                              model.prodmax = TRUE, # productivity rates constrained to be <= maximum brood size
+                              mbs =  p_row$mbs, # maximum brood size
+                              afb = p_row$afb, # age at first breeding
+                              npop = 1, # number of populations (useful if >1 col per SPA) 
+                              nscen = length(impact_name_list), # number of impact scenarios, could do more if upp/low and if site then in-combo?
+                              sim.n = 5000, sim.seed = 8082, nburn = 0, # n simulations, seed number and n burn - NIRAS spec
+                              demobase.specify.as.params = FALSE, # enter empirical values for prod and surv rather than estimate
+                              demobase.splitpops = FALSE, # different demographic rates for each subpopulation, ignored if npop=1
+                              demobase.splitimmat = TRUE, # different demographic rates specified for immatures? (yes, National - NIRAS)
+                              demobase.prod = data.frame(Mean=p_row$mn_base_prod, SD = p_row$sd_base_prod), # baseline productivity mean(s) and SD(s) # select first row as we batch run site and incombo assessments together
+                              demobase.survadult = data.frame(Mean =  p_row$mn_base_adsurv, SD = p_row$sd_base_adsurv), # baseline survival mean(s) and SD(s)
+                              demobase.survimmat = imm_surv, # baseline survival mean(s) and SD(s) for different immature year groups 
+                              inipop.years = 2022, # year(s) when initial count was made
+                              inipop.inputformat = "breeding.adults", # initial population size entered as breeding adults (SMP data) 
+                              inipop.vals = p_row$Count_BrAd, # initial population value(s)
+                              impacts.relative = TRUE, # specify relative impacts (% change in population from impact)
+                              impacts.splitimmat = FALSE, # different impacts specified for immatures? (no - NIRAS)
+                              impacts.year.start = 2023, # when to start impact (inipop.years+1 - NIRAS)
+                              impacts.year.end = 2058,# when does impact end? (impacts.year.start+60 - NIRAS) 
+                              impacts.splitpops = FALSE,  # different impact rates for each subpopulation, ignored if npop=1
+                              impacts.scennames = impact_name_list, # naming impact for reference
+                              impacts.prod.mean = 0, # impacts on productivity, val per population (use 0, no prod impacts - NIRAS)
+                              impacts.survadult.mean = impact_mean_list,# impacts on adult survival # choose CRM/disp/CRM+disp
+                              impacts.provideses = FALSE, # whether to provide SEs for impacts (yes, I think -NIRAS) - not provided by disp so set to false
+                              impacts.prod.se = 0, # se for productivity impact, 0 or NA?, impacts.provideses = FALSE
+                              impacts.survadult.se = 0, # se for survival impact # choose CRM/disp/CRM+disp, set 0 for moment, impacts.provideses = FALSE
+                              output.agetype = "breeding.adults", #  output population as breeding adults
+                              output.year.end = 2058, #when to end model (impacts.year.start+60 - NIRAS)
+                              output.year.start = 2023, # when to start model report from, (inipop.years?)
+                              output.popsize.target = NULL, # don't set output pop target
+                              output.popsize.qe = NULL,# don't set output extinction risk target
+                              silent = F, # suppress progress text, plots
+                              changetablenames = TRUE) # match shiny table names
