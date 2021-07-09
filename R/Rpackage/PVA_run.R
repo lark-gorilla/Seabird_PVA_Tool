@@ -33,27 +33,30 @@ for(m in c('site', 'incombo')) # run for in_combo and site separately
   {
   sp_site<-sp_site_both[sp_site_both$mort_type==m,]
   # need to convert absolute impact (n bird/yr mortality) to relative impact (% change in pop)
-  # here we take mortalities apportioned to the SPA and / by total SPA meta population -
+  # here we take mortlities apportioned to the SPA and / by total SPA meta population -
   # would be better to use total SPA population that went into apportioning analyses 
   
   # CRM
-  mn_rel_imp_CRM<-(sp_site$mn_ann_mort_CRM/2)/sum(sp_site$Count_bp) # what units are absolute mortality, assumed n birds so divide by 2 to get bp?
-  #sd_rel_imp_CRM<-(sp_site$sd_ann_mort_CRM/2)/sum(sp_site$Count_bp) 
+  mn_rel_imp_CRM<-(sp_site$mn_ann_mort_CRM)/sum(sp_site$Count_BrAd) # what units are absolute mortality, assumed n birds so divide by 2 to get bp?
+  #sd_rel_imp_CRM<-(sp_site$sd_ann_mort_CRM)/sum(sp_site$Count_BrAd) 
   # displacement
-  mn_rel_imp_disp<-(sp_site$mn_ann_mort_disp/2)/sum(sp_site$Count_bp)
-  #sd_rel_imp_disp<-(sp_site$sd_ann_mort_disp/2)/sum(sp_site$Count_bp) 
+  mn_rel_imp_disp<-(sp_site$mn_ann_mort_disp)/sum(sp_site$Count_BrAd)
+  #sd_rel_imp_disp<-(sp_site$sd_ann_mort_disp)/sum(sp_site$Count_BrAd) 
   # total sum() CRM + displacement
-  mn_rel_imp_both<-((sp_site$mn_ann_mort_CRM+sp_site$mn_ann_mort_disp)/2)/sum(sp_site$Count_bp)
-  #sd_rel_imp_both<-((sp_site$sd_ann_mort_CRM+sp_site$sd_ann_mort_disp)/2)/sum(sp_site$Count_bp) 
+  mn_rel_imp_both<-((sp_site$mn_ann_mort_CRM+sp_site$mn_ann_mort_disp))/sum(sp_site$Count_BrAd)
+  #sd_rel_imp_both<-((sp_site$sd_ann_mort_CRM+sp_site$sd_ann_mort_disp))/sum(sp_site$Count_BrAd) 
   
   # make impact list, not running combined (both)
   impact_mean_list<-NULL
   impact_name_list<-NULL
   if(sum(mn_rel_imp_CRM)>0){impact_mean_list<-c(impact_mean_list,mn_rel_imp_CRM)}
   if(sum(mn_rel_imp_disp)>0){impact_mean_list<-c(impact_mean_list,mn_rel_imp_disp)}
-  
+  if(mn_rel_imp_both>mn_rel_imp_CRM & mn_rel_imp_both>mn_rel_imp_disp){impact_mean_list<-c(impact_mean_list,mn_rel_imp_both)}
+  #ignore first TRUE warning
   if(sum(mn_rel_imp_CRM)>0){impact_name_list<-c(impact_name_list,paste('CRM_mort', sp_site$mn_ann_mort_CRM, sep='_'))}
   if(sum(mn_rel_imp_disp)>0){impact_name_list<-c(impact_name_list,paste('disp_mort', sp_site$mn_ann_mort_disp, sep='_'))}
+  if(mn_rel_imp_both>mn_rel_imp_CRM & mn_rel_imp_both>mn_rel_imp_disp){impact_name_list<-c(impact_name_list,paste('CRM+disp_mort', sp_site$mn_ann_mort_CRM+sp_site$mn_ann_mort_disp, sep='_'))}
+  #ignore first TRUE warning
   
   print(sp_site)
   print(impact_mean_list)
@@ -86,9 +89,9 @@ run1 <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and produ
                                   demobase.prod = data.frame(Mean=p_row$mn_base_prod, SD = p_row$sd_base_prod), # baseline productivity mean(s) and SD(s) # select first row as we batch run site and incombo assessments together
                                   demobase.survadult = data.frame(Mean =  p_row$mn_base_adsurv, SD = p_row$sd_base_adsurv), # baseline survival mean(s) and SD(s)
                                   demobase.survimmat = imm_surv, # baseline survival mean(s) and SD(s) for different immature year groups 
-                                  inipop.years = as.numeric(p_row$yr), # year(s) when inital count was made
-                                  inipop.inputformat = "breeding.pairs", # initial population size entered as breeding pair (SMP data) 
-                                  inipop.vals = p_row$Count_bp, # initial population value(s)
+                                  inipop.years = as.numeric(p_row$yr), # year(s) when initial count was made
+                                  inipop.inputformat = "breeding.adults", # initial population size entered as breeding adults (SMP data) 
+                                  inipop.vals = p_row$Count_BrAd, # initial population value(s)
                                   impacts.relative = TRUE, # specify relative impacts (% change in population from impact)
                                   impacts.splitimmat = FALSE, # different impacts specified for immatures? (no - NIRAS)
                                   impacts.year.start = as.numeric(p_row$yr)+1, # when to start impact (inipop.years+1 - NIRAS)
@@ -116,7 +119,8 @@ run1 <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and produ
  PVA_run<-rbind(PVA_run, d1)
   } #close m loop
 }# close k loop
-write.csv(PVA_run, 'C:/R4/RIAA/PVA/north_sea_run.csv', quote=F, row.names=F)
+library(writexl)
+write_xlsx(PVA_run, 'C:/R4/RIAA/PVA/north_sea_run.xlsx')
 
 ## ##################################################################
 # # read back in pva run data and extract required metrics and results
@@ -161,7 +165,7 @@ example1 <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and p
                                   demobase.prod = data.frame(Mean=0.5, SD=0.05), # baseline productivity mean(s) and SD(s)
                                   demobase.survadult = data.frame(Mean =  0.88, SD = 0.03), # baseline survival mean(s) and SD(s)
                                   inipop.years = c(2012), # year(s) when inital count was made
-                                  inipop.inputformat = "breeding.pairs", # initial population size entered as breeding adults 
+                                  inipop.inputformat = "breeding.adults", # initial population size entered as breeding adults 
                                   inipop.vals = c(791), # initial population value(s)
                                   impacts.relative = TRUE, # specify relative impacts (% change in population from impact)
                                   impacts.splitimmat = FALSE, # different impacts specified for immatures? (no - NIRAS)
