@@ -127,11 +127,31 @@ write_xlsx(PVA_run, 'C:/R4/RIAA/PVA/north_sea_run.xlsx')
 ## ##################################################################
 library(dplyr)
 
-pva_res<-read.csv('C:/R4/RIAA/PVA/north_sea_run.csv')
+pva_res<-read_xlsx('C:/R4/RIAA/PVA/north_sea_run.xlsx')
 
-pva_res%>%filter(YRS_From_First_Imp==60  & mort_type=='site')%>%select(1:7, 42:51)
+# select every 5 years based on different staring dates of surveyed sp.
+temp2017<-filter(pva_res, Species %in% c('Black-Legged Kittiwake', 'Common Guillemot') &
+                                PVA_site=='Flamborough and Filey Coast')
+temp2017<-filter(temp2017, Year %in% c(2017+c(1,6,11,16,21,26,31,36,41,46,51,56,61)))
 
-# to interpret see pdfs in 'Seabird_PVA_Tool/Documentation'
+temp2018<-filter(pva_res, Species %in% c('Northern Gannet', 'Atlantic Puffin') &
+                   PVA_site=='Flamborough and Filey Coast')
+temp2018<-filter(temp2018, Year %in%c(2018+c(1,6,11,16,21,26,31,36,41,46,51,56,61)))
+
+temp2019<-filter(pva_res, Species== 'Black-Legged Kittiwake' &
+                   PVA_site!='Flamborough and Filey Coast')
+temp2019<-filter(temp2019, Year %in%c(2019+c(1,6,11,16,21,26,31,36,41,46,51,56,61)))
+
+pva_res_filt<-rbind(temp2017, temp2018, temp2019)
+
+# select required columns for output, match those in online tool.
+
+pva_res_sel<-pva_res_filt%>%select(1,2,3,4,6,9, 'Popsize_Median','Popsize_2.5._quantile', 'Popsize_97.5._quantile',
+                      'Annual_GR_Median', 'Annual_GR_LCI', 'Annual_GR_UCI','CGR_Median', 'CGR_LCI', 
+                      'CGR_UCI', 'CPS_Median', 'CPS_LCI', 'CPS_UCI')
+
+write_xlsx(pva_res_sel, 'C:/R4/RIAA/PVA/North_sea_AnnexH5_PVA_results_tables.xlsx')
+
 
 ## ##################################################################
 # # create master lookup sheet - OLD
