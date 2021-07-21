@@ -74,18 +74,18 @@ for(m in c('site', 'incombo')) # run for in_combo and site separately
 # # code to run PVA with shiny app specifications
 ## ##################################################################
 
-run1 <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and productivity (model.prodmax=T) env stochasticity from beta distribution (yes - NIRAS) 
-                                  model.demostoch = TRUE, # model demographic stochasticity (yes - NIRAS)
-                                  model.dd = "nodd", # ' nodd' = no density dependence (density independence - NIRAS)
+run1 <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and productivity (model.prodmax=T) env stochasticity from beta distribution (yes - NE/NIRAS) 
+                                  model.demostoch = TRUE, # model demographic stochasticity (yes - NE/NIRAS)
+                                  model.dd = "nodd", # ' nodd' = no density dependence (density independence - NE/NIRAS)
                                   model.prodmax = TRUE, # productivity rates constrained to be <= maximum brood size
                                   mbs =  p_row$mbs, # maximum brood size
                                   afb = p_row$afb, # age at first breeding
                                   npop = 1, # number of populations (useful if >1 col per SPA) 
                                   nscen = length(impact_name_list), # number of impact scenarios, could do more if upp/low and if site then in-combo?
-                                  sim.n = 5000, sim.seed = 1898, nburn = 0, # n simulations, seed number and n burn - NIRAS spec
+                                  sim.n = 5000, sim.seed = 1898, nburn = 5, # n simulations, seed number and n burn - NE/NIRAS spec
                                   demobase.specify.as.params = FALSE, # enter empirical values for prod and surv rather than estimate
                                   demobase.splitpops = FALSE, # different demographic rates for each subpopulation, ignored if npop=1
-                                  demobase.splitimmat = TRUE, # different demographic rates specified for immatures? (yes, National - NIRAS)
+                                  demobase.splitimmat = TRUE, # different demographic rates specified for immatures? (yes, National - NE/NIRAS)
                                   demobase.prod = data.frame(Mean=p_row$mn_base_prod, SD = p_row$sd_base_prod), # baseline productivity mean(s) and SD(s) # select first row as we batch run site and incombo assessments together
                                   demobase.survadult = data.frame(Mean =  p_row$mn_base_adsurv, SD = p_row$sd_base_adsurv), # baseline survival mean(s) and SD(s)
                                   demobase.survimmat = imm_surv, # baseline survival mean(s) and SD(s) for different immature year groups 
@@ -93,18 +93,18 @@ run1 <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and produ
                                   inipop.inputformat = "breeding.adults", # initial population size entered as breeding adults (SMP data) 
                                   inipop.vals = p_row$Count_BrAd, # initial population value(s)
                                   impacts.relative = TRUE, # specify relative impacts (% change in population from impact)
-                                  impacts.splitimmat = FALSE, # different impacts specified for immatures? (no - NIRAS)
-                                  impacts.year.start = as.numeric(p_row$yr)+1, # when to start impact (inipop.years+1 - NIRAS)
-                                  impacts.year.end = as.numeric(p_row$yr)+61,# when does impact end? (impacts.year.start+60 - NIRAS) 
+                                  impacts.splitimmat = FALSE, # different impacts specified for immatures? (no - NE/NIRAS)
+                                  impacts.year.start = as.numeric(p_row$yr)+1, # when to start impact (inipop.years+1 - NE/NIRAS)
+                                  impacts.year.end = as.numeric(p_row$yr)+61,# when does impact end? (impacts.year.start+60 - NE/NIRAS) 
                                   impacts.splitpops = FALSE,  # different impact rates for each subpopulation, ignored if npop=1
                                   impacts.scennames = impact_name_list, # naming impact for reference
-                                  impacts.prod.mean = 0, # impacts on productivity, val per population (use 0, no prod impacts - NIRAS)
+                                  impacts.prod.mean = 0, # impacts on productivity, val per population (use 0, no prod impacts - NE/NIRAS)
                                   impacts.survadult.mean = impact_mean_list,# impacts on adult survival # choose CRM/disp/CRM+disp
-                                  impacts.provideses = FALSE, # whether to provide SEs for impacts (yes, I think -NIRAS) - not provided by disp so set to false
+                                  impacts.provideses = FALSE, # whether to provide SEs for impacts (yes, I think -NE/NIRAS) - not provided by disp so set to false
                                   impacts.prod.se = 0, # se for productivity impact, 0 or NA?, impacts.provideses = FALSE
                                   impacts.survadult.se = 0, # se for survival impact # choose CRM/disp/CRM+disp, set 0 for moment, impacts.provideses = FALSE
                                   output.agetype = "breeding.adults", #  output population as breeding adults
-                                  output.year.end = as.numeric(p_row$yr)+61, #when to end model (impacts.year.start+60 - NIRAS)
+                                  output.year.end = as.numeric(p_row$yr)+61, #when to end model (impacts.year.start+60 - NE/NIRAS)
                                   output.year.start = as.numeric(p_row$yr), # when to start model report from, (inipop.years?)
                                   output.popsize.target = NULL, # don't set output pop target
                                   output.popsize.qe = NULL,# don't set output extinction risk target
@@ -244,4 +244,43 @@ run_apem <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and p
                               output.popsize.target = NULL, # don't set output pop target
                               output.popsize.qe = NULL,# don't set output extinction risk target
                               silent = F, # suppress progress text, plots
+                              changetablenames = TRUE) # match shiny table names
+
+# run1 model updated with NE's parameter choices (13/07/21)
+
+run1 <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and productivity (model.prodmax=T) env stochasticity from beta distribution (yes - NIRAS) 
+                              model.demostoch = TRUE, # model demographic stochasticity (yes - NIRAS)
+                              model.dd = "nodd", # ' nodd' = no density dependence (density independence - NIRAS)
+                              model.prodmax = TRUE, # productivity rates constrained to be <= maximum brood size
+                              mbs =  p_row$mbs, # maximum brood size
+                              afb = p_row$afb, # age at first breeding
+                              npop = 1, # number of populations (useful if >1 col per SPA) 
+                              nscen = length(impact_name_list), # number of impact scenarios, could do more if upp/low and if site then in-combo?
+                              sim.n = 5000, sim.seed = 1898, nburn = 5, # n simulations, seed number and n burn(NE =5) - NIRAS spec
+                              demobase.specify.as.params = FALSE, # enter empirical values for prod and surv rather than estimate
+                              demobase.splitpops = FALSE, # different demographic rates for each subpopulation, ignored if npop=1
+                              demobase.splitimmat = TRUE, # different demographic rates specified for immatures? (yes, National - NIRAS)
+                              demobase.prod = data.frame(Mean=p_row$mn_base_prod, SD = p_row$sd_base_prod), # baseline productivity mean(s) and SD(s) # select first row as we batch run site and incombo assessments together
+                              demobase.survadult = data.frame(Mean =  p_row$mn_base_adsurv, SD = p_row$sd_base_adsurv), # baseline survival mean(s) and SD(s)
+                              demobase.survimmat = imm_surv, # baseline survival mean(s) and SD(s) for different immature year groups 
+                              inipop.years = as.numeric(p_row$yr), # year(s) when initial count was made
+                              inipop.inputformat = "breeding.adults", # initial population size entered as breeding adults (SMP data) 
+                              inipop.vals = p_row$Count_BrAd, # initial population value(s)
+                              impacts.relative = TRUE, # specify relative impacts (% change in population from impact)
+                              impacts.splitimmat = FALSE, # different impacts specified for immatures? (no - NIRAS)
+                              impacts.year.start = as.numeric(p_row$yr)+1, # when to start impact (inipop.years+1 - NIRAS)
+                              impacts.year.end = as.numeric(p_row$yr)+61,# when does impact end? (impacts.year.start+60 - NIRAS) 
+                              impacts.splitpops = FALSE,  # different impact rates for each subpopulation, ignored if npop=1
+                              impacts.scennames = impact_name_list, # naming impact for reference
+                              impacts.prod.mean = 0, # impacts on productivity, val per population (use 0, no prod impacts - NIRAS)
+                              impacts.survadult.mean = impact_mean_list,# impacts on adult survival # choose CRM/disp/CRM+disp
+                              impacts.provideses = FALSE, # whether to provide SEs for impacts (yes, I think -NIRAS) - not provided by disp so set to false
+                              impacts.prod.se = 0, # se for productivity impact, 0 or NA?, impacts.provideses = FALSE
+                              impacts.survadult.se = 0, # se for survival impact # choose CRM/disp/CRM+disp, set 0 for moment, impacts.provideses = FALSE
+                              output.agetype = "whole.population", #  output population as breeding adults
+                              output.year.end = as.numeric(p_row$yr)+61, #when to end model (impacts.year.start+60 - NIRAS)
+                              output.year.start = as.numeric(p_row$yr), # when to start model report from, (inipop.years?)
+                              output.popsize.target = NULL, # don't set output pop target
+                              output.popsize.qe = NULL,# don't set output extinction risk target
+                              silent = TRUE, # suppress progress text, plots
                               changetablenames = TRUE) # match shiny table names
