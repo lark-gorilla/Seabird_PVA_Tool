@@ -27,6 +27,9 @@ PVA_run<-NULL
 for(k in unique(paste(lookup_dat$Species, lookup_dat$PVA_site, sep='@')))
 
 {  
+  if(k=='Black-Legged Kittiwake@Farne Islands SPA'|
+     k=="Lesser Black-Backed Gull@Morecombe"){next} # PVA not needed anymore
+  
 sp_site_both<-lookup_dat[lookup_dat$Species==unlist(strsplit(k, "@"))[1] & lookup_dat$PVA_site==unlist(strsplit(k, "@"))[2],]
 
 for(m in c('site', 'incombo')) # run for in_combo and site separately
@@ -103,7 +106,7 @@ run1 <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and produ
                                   impacts.provideses = FALSE, # whether to provide SEs for impacts (yes, I think -NE/NIRAS) - not provided by disp so set to false
                                   impacts.prod.se = 0, # se for productivity impact, 0 or NA?, impacts.provideses = FALSE
                                   impacts.survadult.se = 0, # se for survival impact # choose CRM/disp/CRM+disp, set 0 for moment, impacts.provideses = FALSE
-                                  output.agetype = "breeding.adults", #  output population as breeding adults
+                                  output.agetype = "whole.population", #  output population as whole population following NE advice
                                   output.year.end = as.numeric(p_row$yr)+61, #when to end model (impacts.year.start+60 - NE/NIRAS)
                                   output.year.start = as.numeric(p_row$yr), # when to start model report from, (inipop.years?)
                                   output.popsize.target = NULL, # don't set output pop target
@@ -127,7 +130,7 @@ write_xlsx(PVA_run, 'C:/R4/RIAA/PVA/north_sea_run.xlsx')
 ## ##################################################################
 library(dplyr)
 
-pva_res<-read_xlsx('C:/R4/RIAA/PVA/north_sea_run.xlsx')
+pva_res<-read_xlsx('C:/R4/RIAA/PVA/north_sea_runNE13jul_updates.xlsx')
 
 # select every 5 years based on different staring dates of surveyed sp.
 temp2017<-filter(pva_res, Species %in% c('Black-Legged Kittiwake', 'Common Guillemot') &
