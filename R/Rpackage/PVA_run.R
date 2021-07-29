@@ -287,3 +287,42 @@ run1 <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and produ
                               output.popsize.qe = NULL,# don't set output extinction risk target
                               silent = TRUE, # suppress progress text, plots
                               changetablenames = TRUE) # match shiny table names
+
+## annotated for annex
+run1 <- nepva.simplescenarios(model.envstoch = "betagamma", # env stochasticity from beta distribution
+                              model.demostoch = TRUE, # model demographic stochasticity? 
+                              model.dd = "nodd", # ' nodd' = density independence
+                              model.prodmax = TRUE, # productivity rates constrained to be <= maximum brood size?
+                              mbs =  p_row$mbs, # maximum brood size
+                              afb = p_row$afb, # age at first breeding
+                              npop = 1, # number of populations 
+                              nscen = length(impact_name_list), # number of impact scenarios
+                              sim.n = 5000, sim.seed = 1898, nburn = 5, # n simulations, seed number and n burn 
+                              demobase.specify.as.params = FALSE, # enter empirical values for prod and surv rather than estimate?
+                              demobase.splitpops = FALSE, # different demographic rates for each subpopulation?
+                              demobase.splitimmat = TRUE, # different demographic rates specified for immatures? 
+                              demobase.prod = data.frame(Mean=p_row$mn_base_prod, SD = p_row$sd_base_prod), # baseline productivity mean(s) and SD(s) 
+                              demobase.survadult = data.frame(Mean =  p_row$mn_base_adsurv, SD = p_row$sd_base_adsurv), # baseline survival mean(s) and SD(s)
+                              demobase.survimmat = imm_surv, # baseline survival mean(s) and SD(s) for different immature year groups 
+                              inipop.years = as.numeric(p_row$yr), # year when initial count was made
+                              inipop.inputformat = "breeding.adults", # initial population size entered as breeding adults
+                              inipop.vals = p_row$Count_BrAd, # initial population value
+                              impacts.relative = TRUE, # specify relative impacts (% change in population from impact)
+                              impacts.splitimmat = FALSE, # different impacts specified for immatures? 
+                              impacts.year.start = as.numeric(p_row$yr)+1, # when to start impact? year after last count
+                              impacts.year.end = as.numeric(p_row$yr)+61,# when does impact end? 60 years after impact start
+                              impacts.splitpops = FALSE,  # different impact rates for each subpopulation?
+                              impacts.scennames = impact_name_list, # naming impact for reference
+                              impacts.prod.mean = 0, # No impacts on productivity
+                              impacts.survadult.mean = impact_mean_list,# impacts on adult survival
+                              impacts.provideses = FALSE, # Are SEs provided for impacts?
+                              impacts.prod.se = 0, # SE for productivity impact
+                              impacts.survadult.se = 0, # SE for survival impact
+                              output.agetype = "whole.population", #  output population as whole population 
+                              output.year.end = as.numeric(p_row$yr)+61, #when to end model 
+                              output.year.start = as.numeric(p_row$yr), # when to start model report from
+                              output.popsize.target = NULL, # don't set output pop target
+                              output.popsize.qe = NULL,# don't set output extinction risk target
+                              silent = TRUE, # suppress progress text, plots
+                              changetablenames = TRUE) # match shiny table names
+
