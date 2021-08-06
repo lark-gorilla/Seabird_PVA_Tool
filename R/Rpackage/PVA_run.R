@@ -147,7 +147,10 @@ temp2019<-filter(pva_res, Species== 'Black-Legged Kittiwake' &
                    PVA_site!='Flamborough and Filey Coast')
 temp2019<-filter(temp2019, Year %in%c(2019+c(1,6,11,16,21,26,31,36,41,46,51,56,61)))
 
-pva_res_filt<-rbind(temp2017, temp2018, temp2019)
+temp2020<-filter(pva_res, Species== 'Lesser Black-Backed Gull')
+temp2020<-filter(temp2020, Year %in%c(2020+c(1,6,11,16,21,26,31,36,41,46,51,56,61)))
+
+pva_res_filt<-rbind(temp2017, temp2018, temp2019, temp2020)
 
 # select required columns for output, match those in online tool.
 
@@ -155,7 +158,7 @@ pva_res_sel<-pva_res_filt%>%select(1,2,3,4,6,9, 'Popsize_Median','Popsize_2.5._q
                       'Annual_GR_Median', 'Annual_GR_LCI', 'Annual_GR_UCI','CGR_Median', 'CGR_LCI', 
                       'CGR_UCI', 'CPS_Median', 'CPS_LCI', 'CPS_UCI')
 
-write_xlsx(pva_res_sel, 'C:/R4/RIAA/PVA/North_sea_AnnexH5_PVA_results_tables.xlsx')
+#write_xlsx(pva_res_sel, 'C:/R4/RIAA/PVA/North_sea_AnnexH5_PVA_results_tables.xlsx')
 
 
 ## ##################################################################
