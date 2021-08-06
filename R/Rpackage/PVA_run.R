@@ -27,8 +27,7 @@ PVA_run<-NULL
 for(k in unique(paste(lookup_dat$Species, lookup_dat$PVA_site, sep='@')))
 
 {  
-  if(k=='Black-Legged Kittiwake@Farne Islands SPA'|
-     k=="Lesser Black-Backed Gull@Morecombe"){next} # PVA not needed anymore
+  if(k=='Black-Legged Kittiwake@Farne Islands SPA'){next} # PVA not needed anymore
   
 sp_site_both<-lookup_dat[lookup_dat$Species==unlist(strsplit(k, "@"))[1] & lookup_dat$PVA_site==unlist(strsplit(k, "@"))[2],]
 
@@ -72,6 +71,9 @@ for(m in c('site', 'incombo')) # run for in_combo and site separately
                      poolregtype.BS = "Global", poolregion.BS = "Global", 
                      sourcepop.surv = "National", lookup.dir = 'C:/niras_rproj/Seabird_PVA_Tool/R/Rpackage/')$demobase.survimmat
   imm_surv$sd[is.na(imm_surv$sd)]<-mean(imm_surv$sd, na.rm=T) # catch sd NA error, set to other mean of other sd vals
+  
+  nburn_param=5
+  if(k=="Lesser Black-Backed Gull@Morecombe"){nburn_param=0} # turn off burn in for LBBG Morecombe as pop too low
 
 ## ##################################################################
 # # code to run PVA with shiny app specifications
@@ -85,7 +87,7 @@ run1 <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and produ
                                   afb = p_row$afb, # age at first breeding
                                   npop = 1, # number of populations (useful if >1 col per SPA) 
                                   nscen = length(impact_name_list), # number of impact scenarios, could do more if upp/low and if site then in-combo?
-                                  sim.n = 5000, sim.seed = 1898, nburn = 5, # n simulations, seed number and n burn - NE/NIRAS spec
+                                  sim.n = 5000, sim.seed = 1898, nburn = nburn_param, # n simulations, seed number and n burn - NE/NIRAS spec
                                   demobase.specify.as.params = FALSE, # enter empirical values for prod and surv rather than estimate
                                   demobase.splitpops = FALSE, # different demographic rates for each subpopulation, ignored if npop=1
                                   demobase.splitimmat = TRUE, # different demographic rates specified for immatures? (yes, National - NE/NIRAS)
