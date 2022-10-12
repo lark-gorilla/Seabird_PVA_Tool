@@ -18,7 +18,7 @@ modeoptions <- read.csv("ModeOptions.csv") ## Added Version 2.1
 
 ## ##################################################
 
-lookup_dat<-read_xlsx('C:/R4/RIAA/PVA/PVA_lookup_collapsed.xlsx')
+lookup_dat<-read_xlsx('C:/R4/RIAA/PVA/PVA_lookup_collapsed.xlsx') # added LBBG and Gannet FLOW 10/06/2022 and 10/10/22
 
 # have a look
 lookup_dat
@@ -125,14 +125,17 @@ run1 <- nepva.simplescenarios(model.envstoch = "betagamma", # survival and produ
   } #close m loop
 }# close k loop
 library(writexl)
-write_xlsx(PVA_run, 'C:/R4/RIAA/PVA/north_sea_run.xlsx')
+#write_xlsx(PVA_run, 'C:/TCE/floating_wind/LBBG/PVA_LBBG_pembrokeshire.xlsx')
+write_xlsx(PVA_run, 'C:/TCE/floating_wind/RIAA/PVA/PVA_gannet_grassholm_LBBG_scilly.xlsx')
+
 
 ## ##################################################################
 # # read back in pva run data and extract required metrics and results
 ## ##################################################################
 library(dplyr)
 
-pva_res<-read_xlsx('C:/R4/RIAA/PVA/north_sea_runNE13jul_updates.xlsx')
+#pva_res<-read_xlsx('C:/TCE/floating_wind/LBBG/PVA_LBBG_pembrokeshire.xlsx')
+pva_res<-read_xlsx('C:/TCE/floating_wind/RIAA/PVA/PVA_gannet_grassholm_LBBG_scilly.xlsx')
 
 # select every 5 years based on different staring dates of surveyed sp.
 temp2017<-filter(pva_res, Species %in% c('Black-Legged Kittiwake', 'Common Guillemot') &
@@ -150,6 +153,13 @@ temp2019<-filter(temp2019, Year %in%c(2019+c(1,6,11,16,21,26,31,36,41,46,51,56,6
 temp2020<-filter(pva_res, Species== 'Lesser Black-Backed Gull')
 temp2020<-filter(temp2020, Year %in%c(2020+c(1,6,11,16,21,26,31,36,41,46,51,56,61)))
 
+temp2021<-filter(pva_res, Species== 'Lesser Black-Backed Gull' &
+                   PVA_site=="Skomer/Skokholm seas of Pembrokeshire SPA")
+temp2021<-filter(temp2021, Year %in%c(2021+c(1,6,11,16,21,26,31,36,41,46,51,56,61)))
+
+temp2015<-filter(pva_res, PVA_site %in% c("Grassholm", "Isles of Scilly"))
+temp2015<-filter(temp2015, Year %in%c(2015+c(1,6,11,16,21,26,31,36,41,46,51,56,61)))
+
 pva_res_filt<-rbind(temp2017, temp2018, temp2019, temp2020)
 
 # select required columns for output, match those in online tool.
@@ -158,8 +168,8 @@ pva_res_sel<-pva_res_filt%>%select(1,2,3,4,6,9, 'Popsize_Median','Popsize_2.5._q
                       'Annual_GR_Median', 'Annual_GR_LCI', 'Annual_GR_UCI','CGR_Median', 'CGR_LCI', 
                       'CGR_UCI', 'CPS_Median', 'CPS_LCI', 'CPS_UCI')
 
-#write_xlsx(pva_res_sel, 'C:/R4/RIAA/PVA/North_sea_AnnexH5_PVA_results_tables.xlsx')
-
+#write_xlsx(pva_res_sel, 'C:/TCE/floating_wind/LBBG/PVA_LBBG_pembrokeshire_summary.xlsx')
+write_xlsx(pva_res_sel, 'C:/TCE/floating_wind/RIAA/PVA/PVA_gannet_grassholm_LBBG_scilly_summary.xlsx')
 
 ## ##################################################################
 # # create master lookup sheet - OLD
